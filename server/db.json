@@ -1,0 +1,25 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "title": "Mechanical Keyboard",
+      "price": 120,
+      "stock": 5,
+      "image": "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": 2,
+      "title": "Wireless Mouse",
+      "price": 65,
+      "stock": 5,
+      "image": "https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      "id": 3,
+      "title": "USB-C Headphones",
+      "price": 95,
+      "stock": 5,
+      "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80"
+    }
+  ]
+}
