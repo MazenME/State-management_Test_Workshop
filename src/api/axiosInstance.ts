@@ -15,7 +15,7 @@ products store✅
 cart actions
 loading/error states✅
 بناء واجهة المنتجات والكارت.✅
-كتابة اختبارات Zustand بـ Jest.
+كتابة اختبارات Zustand بـ Jest. ✅
 اختبار الواجهة بـ React Testing Library.
 بناء نفس المشروع مرة أخرى باستخدام Redux Toolkit:
 store
