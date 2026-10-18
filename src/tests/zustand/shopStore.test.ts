@@ -1,6 +1,11 @@
-import { beforeEach, describe, expect, test } from "@jest/globals";
+import { beforeEach, describe, expect, jest, test } from "@jest/globals";
 import type { Product } from "../../types/products";
 import { useShopStore } from "../../store/zustand/shopStore";
+import { getProducts } from "../../api/productsApi";
+
+jest.mock("./../../api/productsApi.ts", () => ({
+  getProducts: jest.fn(),
+}));
 
 beforeEach(() => {
   localStorage.clear();
@@ -23,31 +28,25 @@ describe("Shop Store - Cart", () => {
     ...overrides,
   });
 
-    
+  const mockedProducts = jest.mocked(getProducts);
   test("fetches products and updates the store state", async () => {
-    const mockProducts: Product[] = [
-      {
-        id: 1,
-        title: "Mechanical Keyboard",
-        price: 120,
-        stock: 5,
-        image: "keyboard.jpg",
-      },
-      {
-        id: 2,
-        title: "Wireless Mouse",
-        price: 50,
-        stock: 10,
-        image: "mouse.jpg",
-      },
-    ];
-    useShopStore.getState().products = mockProducts;
-    const products = useShopStore.getState().products;
-    expect(products).toEqual(mockProducts);
+    mockedProducts.mockResolvedValueOnce([createProduct()]);
+    await useShopStore.getState().fetchProducts();
+
+    const state = useShopStore.getState();
+    expect(state.products).toHaveLength(1);
+    expect(state.products[0]).toMatchObject({
+      id: 1,
+      title: "Mechanical Keyboard",
+      price: 120,
+      stock: 5,
+      image: "keyboard.jpg",
+    });
+    expect(state.isLoading).toBe(false);
+    expect(state.error).toBeNull();
   });
-  
 
-
+  test("fetches products and updates the store state", async () => {});
 
   test("should add a new product to an empty cart", () => {
     const product = createProduct();
@@ -173,3 +172,85 @@ describe("Shop Store - Cart", () => {
     expect(cart).toHaveLength(0);
   });
 });
+
+/*
+import { beforeEach, describe, expect, jest, test } from "@jest/globals";
+import { axiosInstance } from "./axiosInstance";
+import { addProduct, updateProduct, deleteProduct, checkout } from "./productsApi";
+
+// الـ factory لازم تحتوي كل method بتستخدمها
+jest.mock("./axiosInstance", () => ({
+  axiosInstance: {
+    get: jest.fn(),
+    post: jest.fn(),
+    patch: jest.fn(),
+    delete: jest.fn(),
+  },
+}));
+
+const mockedPost = jest.mocked(axiosInstance.post);
+const mockedPatch = jest.mocked(axiosInstance.patch);
+const mockedDelete = jest.mocked(axiosInstance.delete);
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
+
+describe("addProduct (POST)", () => {
+  test("sends the body and returns the created product", async () => {
+    const newProduct = { title: "Mouse", price: 50, stock: 10, image: "m.jpg" };
+    const created = { id: 7, ...newProduct };
+    mockedPost.mockResolvedValueOnce({ data: created });
+
+    const result = await addProduct(newProduct);
+
+    expect(result).toEqual(created);
+    // هنا الأهم: المسار + الـ body
+    expect(mockedPost).toHaveBeenCalledWith("/products", newProduct);
+  });
+});
+
+describe("updateProduct (PATCH)", () => {
+  test("sends only the changed fields to the right id", async () => {
+    mockedPatch.mockResolvedValueOnce({ data: { id: 3, price: 99 } });
+
+    await updateProduct(3, { price: 99 });
+
+    expect(mockedPatch).toHaveBeenCalledWith("/products/3", { price: 99 });
+  });
+});
+
+describe("deleteProduct (DELETE)", () => {
+  test("calls the right URL and returns nothing", async () => {
+    mockedDelete.mockResolvedValueOnce({ data: {} });
+
+    const result = await deleteProduct(3);
+
+    expect(result).toBeUndefined();
+    expect(mockedDelete).toHaveBeenCalledWith("/products/3"); // مفيش body
+  });
+});
+
+describe("checkout (payment)", () => {
+  const payload = { items: [{ id: 1, quantity: 2 }], total: 240 };
+
+  test("returns the payment result on success", async () => {
+    mockedPost.mockResolvedValueOnce({ data: { status: "paid", orderId: "A1" } });
+
+    const result = await checkout(payload);
+
+    expect(result).toEqual({ status: "paid", orderId: "A1" });
+    expect(mockedPost).toHaveBeenCalledTimes(1);          // اتنادت مرة واحدة بس
+    expect(mockedPost).toHaveBeenCalledWith("/payments", payload);
+  });
+
+  test("rejects when the payment is declined", async () => {
+    const declined = { response: { status: 402, data: { message: "Card declined" } } };
+    mockedPost.mockRejectedValueOnce(declined);
+
+    await expect(checkout(payload)).rejects.toBe(declined);
+  });
+});
+
+
+*/ 
